@@ -1,0 +1,538 @@
+/* =====================================================================
+   DIAMOND FOIL — habillage TCG
+   Technique d'empilement inspirée de pokemon-cards-css (simeydotme) :
+   plusieurs couches superposées en background-blend-mode, pilotées par
+   --pointer-x / --pointer-y écrites en JS, et composées entre elles en
+   mix-blend-mode. C'est le mélange des deux qui donne la profondeur ;
+   une seule couche d'arc-en-ciel donne un autocollant.
+   ===================================================================== */
+
+:root{
+  --ink:#070b12; --deep:#0c121c; --panel:#141d2b; --panel-hi:#1e2a3d;
+  --chalk:#f2f5f0; --chalk-dim:#8b97a6;
+  --sodium:#f5b942; --clay:#b4573a; --turf:#3e7d52;
+  --font-display:'Bebas Neue','Arial Narrow',Haettenschweiler,sans-serif;
+  --font-body:'Inter',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --ratio-card:2.5/3.5;
+
+  /* Position verticale du cadrage de la photo. Les portraits officiels MLB
+     placent le visage dans le tiers supérieur ; 18 % centre le regard.
+     Ajustez cette seule valeur si le cadrage ne vous convient pas. */
+  --face-y:18%;
+  --fld-grass:#2f7d4a;
+  --fld-dirt:#b0713f;
+}
+
+*{box-sizing:border-box}
+html{background:var(--ink);color:var(--chalk);-webkit-font-smoothing:antialiased}
+body{
+  margin:0;font-family:var(--font-body);min-height:100vh;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -20%,rgba(245,185,66,.09),transparent 62%),
+    radial-gradient(ellipse 60% 40% at 12% 8%,rgba(74,144,217,.07),transparent 60%),
+    radial-gradient(ellipse 60% 40% at 88% 4%,rgba(185,140,240,.06),transparent 60%),
+    var(--ink);
+  background-attachment:fixed;
+}
+:focus-visible{outline:2px solid var(--sodium);outline-offset:3px;border-radius:4px}
+::selection{background:var(--sodium);color:var(--ink)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--chalk-dim);margin:0}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+/* =====================================================================
+   LA CARTE
+   ===================================================================== */
+.tcg{
+  --px:50%; --py:50%; --rx:0deg; --ry:0deg; --dist:0; --glare:0;
+  position:relative; width:100%; aspect-ratio:var(--ratio-card);
+  perspective:1000px; isolation:isolate; container-type:inline-size;
+}
+
+/* --- Palettes métalliques par rareté ------------------------------- */
+/* Chaque rareté a un métal, pas juste une teinte : c'est ce qui donne
+   la lecture « collection » plutôt que « code couleur ». */
+.tcg[data-rarity=common]{
+  --m1:#39424f; --m2:#5d6b7d; --m3:#8b98a8; --tint:#7c8ba1; --ink-tint:#0e141d}
+.tcg[data-rarity=rare]{
+  --m1:#17395e; --m2:#2f6ea8; --m3:#7fb4e2; --tint:#4a90d9; --ink-tint:#0a1726}
+.tcg[data-rarity=epic]{
+  --m1:#5c2c17; --m2:#a85f2c; --m3:#e8a765; --tint:#d2703f; --ink-tint:#1c0f08}
+.tcg[data-rarity=holo]{
+  --m1:#3b1d63; --m2:#7b45c4; --m3:#c9a3ff; --tint:#b98cf0; --ink-tint:#150a24}
+.tcg[data-rarity=legend]{
+  --m1:#6b4c07; --m2:#c99a1c; --m3:#ffe9a3; --tint:#f5c542; --ink-tint:#1a1204}
+.tcg[data-rarity=ultra]{
+  --m1:#04ararara; --m2:#12b8ad; --m3:#a8fff5; --tint:#7dfff0; --ink-tint:#03181c}
+.tcg[data-rarity=ultra]{--m1:#043b3f}
+
+/* --- Identité d'équipe -------------------------------------------------
+   Sur les paliers Commune et Rare — les plus nombreux — le cadre prend les
+   couleurs du club. C'est ce qui rend un classeur lisible : on reconnaît
+   une carte des Dodgers ou des Cardinals avant même de lire le nom.
+   Les paliers supérieurs gardent leur métal propre, sinon la rareté
+   deviendrait illisible. */
+.tcg[data-rarity=common][style*="--t1"],
+.tcg[data-rarity=rare][style*="--t1"]{
+  --m1:var(--t1); --m2:color-mix(in srgb,var(--t1) 55%,var(--t2));
+  --m3:color-mix(in srgb,var(--t2) 78%,#fff); --tint:var(--t2);
+  --ink-tint:color-mix(in srgb,var(--t1) 30%,#05080d);
+}
+
+.tcg__tilt{
+  position:relative; width:100%; height:100%;
+  border-radius:5.2%/3.7%;
+  transform-style:preserve-3d;
+  transform:rotateX(var(--rx)) rotateY(var(--ry)) scale3d(1.015,1.015,1.015);
+  box-shadow:
+    0 20px 44px -20px rgba(0,0,0,.9),
+    0 0 0 1px color-mix(in srgb,var(--m3) 22%,transparent);
+  transition:box-shadow .22s ease;
+}
+.tcg[data-resting=false] .tcg__tilt{
+  will-change:transform;
+  box-shadow:
+    0 34px 62px -22px rgba(0,0,0,.95),
+    0 0 34px -6px color-mix(in srgb,var(--tint) 60%,transparent),
+    0 0 0 1px color-mix(in srgb,var(--m3) 55%,transparent);
+}
+.tcg[data-resting=true] .tcg__tilt{
+  transform:rotateX(0) rotateY(0) scale3d(1,1,1);
+  /* Ressort court à la sortie du curseur : la carte « retombe » comme un
+     objet, sans rebond caricatural. */
+  transition:transform .7s cubic-bezier(.18,1.25,.35,1),box-shadow .3s ease;
+}
+
+/* --- Le cadre métallique ------------------------------------------- */
+.tcg__frame{
+  position:absolute; inset:0; border-radius:5.2%/3.7%; overflow:hidden;
+  padding:4.2cqw;
+  background:
+    linear-gradient(148deg,
+      var(--m1) 0%, var(--m2) 22%, var(--m3) 38%, var(--m2) 48%,
+      var(--m1) 60%, var(--m2) 78%, var(--m3) 92%, var(--m1) 100%);
+}
+/* Biseau interne : une ligne claire en haut, sombre en bas. C'est le
+   détail qui fait lire le cadre comme du métal embouti et non comme un
+   aplat coloré. */
+.tcg__frame::after{
+  content:""; position:absolute; inset:0; border-radius:5.2%/3.7%;
+  pointer-events:none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.4),
+    inset 0 -1px 0 rgba(0,0,0,.55),
+    inset 0 0 2.2cqw rgba(0,0,0,.35);
+}
+
+.tcg__inner{
+  position:relative; width:100%; height:100%;
+  border-radius:2.6%/1.9%;
+  background:linear-gradient(180deg,var(--ink-tint),var(--deep) 60%);
+  box-shadow:0 0 0 1px rgba(0,0,0,.6), inset 0 0 3cqw rgba(0,0,0,.5);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+
+/* --- Bandeau nom ---------------------------------------------------- */
+.tcg__head{
+  position:relative; z-index:3;
+  display:flex; align-items:center; gap:2.2cqw;
+  padding:2.2cqw 3cqw 1.8cqw;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--m2) 40%,transparent), transparent);
+  border-bottom:1px solid color-mix(in srgb,var(--m3) 30%,transparent);
+}
+.tcg__name{
+  font-family:var(--font-display); font-weight:400; margin:0;
+  font-size:clamp(10px,8.2cqw,23px); line-height:.94; letter-spacing:.015em;
+  text-shadow:0 1px 0 rgba(0,0,0,.7), 0 0 12px color-mix(in srgb,var(--tint) 35%,transparent);
+  white-space:nowrap; overflow:hidden; text-overflow:clip;
+  flex:1 1 auto; min-width:0;
+}
+.tcg__name[data-long="1"]{font-size:clamp(9px,7cqw,19px)}
+.tcg__name[data-long="2"]{font-size:clamp(8px,5.9cqw,16px); letter-spacing:-.005em}
+/* Pastille de poste : le repère qu'on lit en premier dans un jeu de
+   baseball japonais — grosse, colorée, à gauche du nom. */
+.tcg__pos{
+  flex:0 0 auto;
+  font-family:var(--font-display); font-size:clamp(9px,7.6cqw,20px); line-height:1;
+  color:#fff; background:linear-gradient(180deg,var(--t2,#888),color-mix(in srgb,var(--t1,#333) 70%,#000));
+  border-radius:1.4cqw; padding:1.4cqw 2.2cqw; min-width:9cqw; text-align:center;
+  box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 2px 4px -1px rgba(0,0,0,.7);
+  text-shadow:0 1px 2px rgba(0,0,0,.7);
+}
+.tcg__num{
+  flex:0 0 auto;
+  font-family:var(--font-display); font-size:clamp(11px,9cqw,26px); line-height:1;
+  /* Blanc plutôt que la couleur du métal : sur un bandeau clair (Orioles,
+     Padres), --m3 se confondait avec le fond et le numéro disparaissait.
+     Le double liseré le décolle de n'importe quelle teinte. */
+  color:#fff; opacity:.94;
+  text-shadow:0 1px 2px rgba(0,0,0,.85), 0 0 6px rgba(0,0,0,.6);
+}
+
+/* --- Fenêtre d'illustration ----------------------------------------- */
+/* Le portrait occupe la moitié haute de la carte, comme sur une carte à
+   jouer. La version précédente lui donnait un cadre presque carré, ce qui
+   forçait un recadrage agressif et coupait les visages. */
+.tcg__art{
+  position:relative; z-index:2;
+  margin:2.4cqw 3cqw 0; flex:1 1 auto; min-height:0;
+  border-radius:1.6%;
+  overflow:hidden;
+  /* Fond plat, identique au b_rgb demandé à Cloudinary : si l'image doit
+     être complétée, le raccord est invisible. */
+  background:var(--deep);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb,var(--m3) 34%,transparent),
+    inset 0 0 3cqw rgba(0,0,0,.6);
+}
+.tcg__art img{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; object-position:center top;
+  filter:contrast(1.06) saturate(1.06);
+}
+.tcg__ini{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-size:34cqw; letter-spacing:.03em;
+  color:color-mix(in srgb,var(--m2) 45%,transparent);
+}
+/* Halo derrière le joueur — donne du relief et sépare le sujet du fond. */
+.tcg__art::before{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(ellipse 62% 46% at 50% 34%,
+    color-mix(in srgb,var(--tint) 26%,transparent), transparent 70%);
+  mix-blend-mode:screen;
+}
+/* Fondu vers le bas, pour asseoir le bandeau de poste. */
+.tcg__art::after{
+  content:""; position:absolute; inset:auto 0 0 0; height:34%; z-index:2;
+  pointer-events:none;
+  background:linear-gradient(to top,var(--ink-tint),transparent);
+}
+
+.tcg__logo{
+  position:absolute; right:2.5cqw; top:2.5cqw; z-index:3;
+  width:13cqw; height:13cqw; opacity:.9;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.85));
+}
+
+/* --- Bandeau poste / équipe ----------------------------------------- */
+.tcg__banner{
+  position:relative; z-index:4; margin:-3.2cqw 3cqw 0;
+  white-space:nowrap;
+  /* La couleur du club prime ici, quel que soit le palier : c'est le
+     repère d'appartenance, il doit être constant. */
+  --bn1:var(--t1,var(--m2)); --bn2:var(--t2,var(--m1));
+  display:flex; align-items:center; justify-content:space-between; gap:2cqw;
+  padding:1.5cqw 2.6cqw;
+  border-radius:.9cqw;
+  background:linear-gradient(180deg,var(--bn1),color-mix(in srgb,var(--bn2) 60%,var(--bn1)));
+  box-shadow:0 1px 0 rgba(255,255,255,.28) inset,
+             0 -1px 0 rgba(0,0,0,.5) inset,
+             0 3px 8px -3px rgba(0,0,0,.8);
+  font-family:var(--font-mono); font-size:clamp(5.5px,4.1cqw,10px);
+  letter-spacing:.1em; text-transform:uppercase;
+  color:#fff; text-shadow:0 1px 1px rgba(0,0,0,.6);
+}
+.tcg__banner > span:first-child{
+  overflow:hidden; text-overflow:ellipsis; min-width:0;
+}
+
+/* --- Panneau statistiques -------------------------------------------- */
+.tcg__stats{
+  position:relative; z-index:3; margin:2cqw 3cqw 0;
+  display:grid; grid-template-columns:repeat(4,1fr);
+  border-radius:.9cqw; overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(0,0,0,.28));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--m3) 22%,transparent);
+}
+.tcg__stat{padding:1.5cqw .5cqw 1.8cqw; text-align:center}
+.tcg__stat + .tcg__stat{box-shadow:inset 1px 0 0 color-mix(in srgb,var(--m3) 18%,transparent)}
+.tcg__stat .l{
+  display:block; font-family:var(--font-mono); font-size:clamp(6px,4.3cqw,10px);
+  letter-spacing:.14em; color:var(--chalk-dim); text-transform:uppercase}
+.tcg__stat .v{
+  display:block; margin-top:.5cqw; font-family:var(--font-display);
+  font-size:clamp(11px,9.4cqw,22px); letter-spacing:.02em;
+  color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.8)}
+
+/* --- Pied : rareté et numéro de série -------------------------------- */
+.tcg__foot{
+  position:relative; z-index:3;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.8cqw 3.4cqw 2.4cqw;
+  font-family:var(--font-mono); font-size:clamp(5.5px,4.2cqw,10px);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--chalk-dim);
+}
+.tcg__gem{
+  display:inline-flex; align-items:center; gap:1.4cqw;
+  color:var(--m3); text-shadow:0 0 8px color-mix(in srgb,var(--tint) 60%,transparent);
+}
+/* Le losange de rareté : le repère qu'on cherche en premier sur une carte
+   physique. Sa taille et son remplissage montent avec le palier. */
+.tcg__gem i{
+  width:2.6cqw; height:2.6cqw; rotate:45deg; display:block;
+  background:linear-gradient(135deg,var(--m3),var(--m2));
+  box-shadow:0 0 5px color-mix(in srgb,var(--tint) 80%,transparent);
+}
+.tcg[data-rarity=common] .tcg__gem i{background:none;box-shadow:none;
+  border:1px solid var(--m3)}
+.tcg[data-rarity=rare] .tcg__gem i{background:var(--m3);box-shadow:none}
+
+/* --- Mini-terrain ---------------------------------------------------
+   Le losange avec le poste allumé. Emprunté aux jeux de baseball
+   japonais, où la position se lit d'un coup d'œil sans lire le sigle. */
+.tcg__field{
+  position:absolute; left:2.4cqw; bottom:2.4cqw; z-index:4;
+  width:26cqw; height:26cqw;
+  --pos-glow:var(--t2,#f5b942);
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.85));
+  opacity:.95;
+}
+
+/* --- Latéralité ------------------------------------------------------ */
+.tcg__hand{
+  font-family:var(--font-mono); font-weight:500;
+  background:rgba(0,0,0,.35); border-radius:.8cqw; padding:.4cqw 1.4cqw;
+}
+
+/* --- Marqueurs ------------------------------------------------------- */
+.tcg__tags{
+  position:absolute; left:2.4cqw; top:2.4cqw; z-index:4;
+  display:flex; flex-direction:column; gap:1cqw; align-items:flex-start;
+}
+.tcg__tag{
+  font-family:var(--font-mono); font-size:clamp(5.5px,3.9cqw,9px);
+  letter-spacing:.1em; text-transform:uppercase; font-weight:500;
+  padding:.7cqw 1.6cqw; border-radius:.6cqw; color:#0a0f16;
+  box-shadow:0 2px 5px -2px rgba(0,0,0,.9);
+  white-space:nowrap;
+}
+
+/* --- Pastille vidéo -------------------------------------------------- */
+.tcg__play{
+  position:absolute; right:2.5cqw; bottom:2.5cqw; z-index:5;
+  width:9cqw; height:9cqw; border-radius:50%;
+  background:rgba(6,10,16,.75); border:1px solid var(--m3);
+  display:grid; place-items:center;
+  box-shadow:0 0 10px color-mix(in srgb,var(--tint) 70%,transparent);
+}
+.tcg__play::before{
+  content:""; width:0; height:0; margin-left:.6cqw;
+  border-left:2.6cqw solid var(--m3);
+  border-top:1.7cqw solid transparent; border-bottom:1.7cqw solid transparent;
+}
+
+/* =====================================================================
+   COUCHES HOLOGRAPHIQUES
+   Empilées au-dessus de tout le contenu, dans .tcg__tilt.
+   ===================================================================== */
+.tcg__glare,.tcg__foil,.tcg__glitter{
+  position:absolute; inset:0; border-radius:5.2%/3.7%;
+  pointer-events:none; z-index:6;
+}
+
+/* Couche 1 — reflet directionnel. Sur toutes les raretés : c'est elle qui
+   vend le vernis, indépendamment du foil. */
+.tcg__glare{
+  opacity:var(--glare);
+  background:radial-gradient(circle at var(--px) var(--py),
+    rgba(255,255,255,.6) 0%, rgba(255,255,255,.14) 20%, transparent 52%);
+  mix-blend-mode:overlay;
+  transition:opacity .22s ease;
+  z-index:8;
+}
+
+/* Couche 2 — le foil, technique de pokemon-cards-css (simeydotme).
+   Trois éléments que je n'avais pas dans la version précédente et qui
+   font toute la différence :
+
+   1. --h : la TEINTE est pilotée par le pointeur, pas seulement la
+      position du dégradé. C'est ce qui fait que les couleurs *changent*
+      quand la carte bouge, au lieu de simplement glisser.
+   2. --space : les raies sont posées avec une unité commune, ce qui
+      garde le motif cohérent quelle que soit la taille de la carte.
+   3. Plusieurs couches mélangées entre elles par background-blend-mode
+      AVANT d'être composées sur la carte, la dernière étant un
+      radial-gradient `farthest-corner` centré sur le pointeur qui sert
+      de modulateur d'intensité.
+*/
+.tcg__foil{
+  --space: 5%;
+  --h: 0;
+  --s: 90%;
+  --l: 60%;
+  --bars: 68px;
+  --bar-bg: rgb(10,10,10);
+  --bar-color: rgba(255,255,255,.35);
+  opacity:0;
+  background-position:
+    center, center,
+    calc(((var(--px) - 50%) * -0.6) + 50%) calc(((var(--py) - 50%) * -0.6) + 50%),
+    center;
+  background-size: 100% 100%, 200% 200%, 220% 220%, cover;
+  background-blend-mode: color-dodge, hard-light, overlay;
+  mix-blend-mode: color-dodge;
+  filter: brightness(.85) contrast(2.2) saturate(1.2);
+  transition:opacity .26s ease;
+}
+
+.tcg[data-rarity=epic] .tcg__foil{
+  opacity:calc(.02 + var(--dist) * .5);
+  --h: calc(20 + (var(--pxn) * 40));
+  background-image:
+    repeating-linear-gradient(100deg,
+      hsl(calc(var(--h) + 6), var(--s), 42%) calc(var(--space) * 1),
+      hsl(calc(var(--h) + 22), var(--s), 66%) calc(var(--space) * 2),
+      hsl(calc(var(--h) + 6), var(--s), 42%) calc(var(--space) * 3)),
+    repeating-linear-gradient(90deg,
+      var(--bar-bg) calc(var(--bars) * .2), var(--bar-color) calc(var(--bars) * .3),
+      var(--bar-bg) calc(var(--bars) * .45), var(--bar-color) calc(var(--bars) * .55),
+      var(--bar-bg) calc(var(--bars) * .8)),
+    repeating-linear-gradient(115deg,
+      rgba(255,190,110,.55) 0%, rgba(255,240,200,.75) 3%, rgba(160,90,30,.5) 6%),
+    radial-gradient(farthest-corner circle at var(--px) var(--py),
+      rgba(240,225,200,.85) 0%, rgba(180,140,90,.12) 26%, rgb(0,0,0) 88%);
+}
+
+.tcg[data-rarity=holo] .tcg__foil{
+  opacity:calc(.02 + var(--dist) * .58);
+  --h: calc(var(--pxn) * 360);
+  background-image:
+    repeating-linear-gradient(105deg,
+      hsl(calc(var(--h) + 0),   var(--s), var(--l)) calc(var(--space) * 1),
+      hsl(calc(var(--h) + 60),  var(--s), var(--l)) calc(var(--space) * 2),
+      hsl(calc(var(--h) + 120), var(--s), var(--l)) calc(var(--space) * 3),
+      hsl(calc(var(--h) + 180), var(--s), var(--l)) calc(var(--space) * 4),
+      hsl(calc(var(--h) + 240), var(--s), var(--l)) calc(var(--space) * 5),
+      hsl(calc(var(--h) + 300), var(--s), var(--l)) calc(var(--space) * 6),
+      hsl(calc(var(--h) + 360), var(--s), var(--l)) calc(var(--space) * 7)),
+    repeating-linear-gradient(90deg,
+      var(--bar-bg) calc(var(--bars) * .2), var(--bar-color) calc(var(--bars) * .3),
+      var(--bar-bg) calc(var(--bars) * .45), var(--bar-color) calc(var(--bars) * .55),
+      var(--bar-bg) calc(var(--bars) * .8)),
+    repeating-linear-gradient(125deg,
+      rgba(255,119,115,.5) 0%, rgba(255,237,95,.5) 2%, rgba(168,255,95,.5) 4%,
+      rgba(131,255,247,.5) 6%, rgba(120,148,255,.5) 8%, rgba(216,117,255,.5) 10%),
+    radial-gradient(farthest-corner circle at var(--px) var(--py),
+      rgba(235,235,235,.85) 0%, rgba(200,200,200,.1) 25%, rgb(0,0,0) 90%);
+}
+
+.tcg[data-rarity=legend] .tcg__foil{
+  opacity:calc(.03 + var(--dist) * .56);
+  --h: calc(35 + (var(--pxn) * 25));
+  --s: 85%;
+  background-image:
+    repeating-linear-gradient(96deg,
+      hsl(calc(var(--h) + 0),  var(--s), 38%) calc(var(--space) * 1),
+      hsl(calc(var(--h) + 14), var(--s), 78%) calc(var(--space) * 2),
+      hsl(calc(var(--h) + 0),  var(--s), 38%) calc(var(--space) * 3)),
+    repeating-linear-gradient(90deg,
+      var(--bar-bg) calc(var(--bars) * .16), var(--bar-color) calc(var(--bars) * .26),
+      var(--bar-bg) calc(var(--bars) * .4), var(--bar-color) calc(var(--bars) * .5),
+      var(--bar-bg) calc(var(--bars) * .7)),
+    repeating-linear-gradient(120deg,
+      rgba(255,240,190,.7) 0%, rgba(255,255,235,.85) 2.5%, rgba(150,110,20,.5) 5%),
+    radial-gradient(farthest-corner circle at var(--px) var(--py),
+      rgba(255,246,214,.9) 0%, rgba(190,150,60,.14) 24%, rgb(0,0,0) 86%);
+}
+
+.tcg[data-rarity=ultra] .tcg__foil{
+  opacity:calc(.04 + var(--dist) * .62);
+  --h: calc(150 + (var(--pxn) * 90));
+  --s: 100%;
+  --l: 66%;
+  background-image:
+    repeating-linear-gradient(88deg,
+      hsl(calc(var(--h) + 0),  var(--s), 34%) calc(var(--space) * 1),
+      hsl(calc(var(--h) + 25), var(--s), 82%) calc(var(--space) * 1.8),
+      hsl(calc(var(--h) + 50), var(--s), 48%) calc(var(--space) * 2.6),
+      hsl(calc(var(--h) + 0),  var(--s), 34%) calc(var(--space) * 3.4)),
+    repeating-linear-gradient(90deg,
+      var(--bar-bg) calc(var(--bars) * .14), var(--bar-color) calc(var(--bars) * .22),
+      var(--bar-bg) calc(var(--bars) * .34), var(--bar-color) calc(var(--bars) * .44),
+      var(--bar-bg) calc(var(--bars) * .62)),
+    repeating-linear-gradient(132deg,
+      rgba(125,255,240,.6) 0%, rgba(230,255,252,.9) 2%, rgba(15,120,140,.55) 4.5%),
+    radial-gradient(farthest-corner circle at var(--px) var(--py),
+      rgba(220,255,250,.9) 0%, rgba(60,180,190,.14) 24%, rgb(0,0,0) 86%);
+  filter: brightness(.9) contrast(2.4) saturate(1.35);
+}
+
+/* Couche 3 — paillettes. Motif fixe par rapport à la carte, légèrement
+   contre-décalé par rapport au pointeur : les grains semblent SOUS le
+   vernis et non posés dessus. */
+.tcg__glitter{
+  opacity:0; z-index:7;
+  background-image:
+    radial-gradient(circle at 16% 21%, #fff 0%, transparent 1.5%),
+    radial-gradient(circle at 71% 13%, #fff6d6 0%, transparent 1.2%),
+    radial-gradient(circle at 42% 55%, #fff 0%, transparent 1.4%),
+    radial-gradient(circle at 87% 69%, #d6ecff 0%, transparent 1.1%),
+    radial-gradient(circle at 11% 79%, #fff 0%, transparent 1.3%),
+    radial-gradient(circle at 61% 88%, #ffe8f6 0%, transparent 1%),
+    radial-gradient(circle at 31% 36%, #fff 0%, transparent .9%),
+    radial-gradient(circle at 81% 41%, #fff 0%, transparent .85%),
+    radial-gradient(circle at 24% 62%, #fff 0%, transparent .8%),
+    radial-gradient(circle at 55% 27%, #fff4cc 0%, transparent .95%),
+    radial-gradient(circle at 92% 24%, #fff 0%, transparent .75%),
+    radial-gradient(circle at 6% 45%, #fff 0%, transparent .8%);
+  background-position:calc(50% - (var(--px) - 50%)*.12) calc(50% - (var(--py) - 50%)*.12);
+  mix-blend-mode:screen;
+  transition:opacity .24s ease;
+}
+.tcg[data-rarity=holo] .tcg__glitter{opacity:calc(.1 + var(--dist)*.65)}
+.tcg[data-rarity=legend] .tcg__glitter{opacity:calc(.14 + var(--dist)*.6);
+  filter:drop-shadow(0 0 3px rgba(255,235,170,.8))}
+
+/* --- Verrouillée ---------------------------------------------------- */
+.tcg[data-rarity=ultra] .tcg__foil{
+  opacity:calc(.04 + var(--dist) * .64);
+  background-image:
+    repeating-linear-gradient(88deg,
+      #033b3f 0%, #12b8ad 1.1%, #a8fff5 1.9%, #46e0ff 2.8%, #0b6d8a 4.2%, #033b3f 5.6%),
+    radial-gradient(farthest-corner circle at var(--px) var(--py),
+      rgba(200,255,250,.7) 6%, rgba(30,150,160,.55) 32%, rgba(0,0,0,.92) 74%);
+  filter:brightness(.95) contrast(1.6) saturate(1.4);
+}
+.tcg[data-rarity=ultra] .tcg__glitter{opacity:calc(.16 + var(--dist)*.66);
+  filter:drop-shadow(0 0 3px rgba(160,255,245,.9))}
+
+/* Une carte non débloquée reste LISIBLE. On désature et on assombrit la
+   photo, pas la carte entière : le nom, le poste, l'équipe et les stats
+   doivent rester déchiffrables — c'est ce qui donne envie de l'obtenir. */
+.tcg--locked .tcg__tilt{filter:saturate(.35) brightness(.78)}
+.tcg--locked .tcg__inner{opacity:.92}
+.tcg--locked .tcg__art{background:linear-gradient(180deg,#141d2b,#080d14)}
+.tcg__silh{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-family:var(--font-display); font-size:34cqw; color:rgba(255,255,255,.09);
+}
+.tcg--locked .tcg__glare,.tcg--locked .tcg__foil,.tcg--locked .tcg__glitter{display:none}
+/* Bandeau « à débloquer », en diagonale — plus lisible qu'un cadenas. */
+/* Le bandeau vit DANS .tcg__tilt, qui a overflow visible : sans clip il
+   débordait sur les cartes voisines de la grille. */
+.tcg--locked .tcg__inner::after{
+  content:"À DÉBLOQUER";
+  position:absolute; left:-16%; top:42%; width:132%; z-index:9;
+  transform:rotate(-11deg);
+  text-align:center; font-family:var(--font-mono); font-weight:500;
+  font-size:clamp(6px,4.4cqw,11px); letter-spacing:.2em;
+  color:rgba(255,255,255,.82);
+  background:rgba(8,12,20,.72);
+  padding:1.4cqw 0;
+  border-top:1px solid rgba(255,255,255,.22);
+  border-bottom:1px solid rgba(255,255,255,.22);
+  pointer-events:none;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .tcg__tilt{transform:none!important;transition:none!important}
+  .tcg__foil{opacity:.34!important}
+  .tcg__glitter{opacity:.3!important}
+  .tcg__glare{opacity:.14!important}
+  *,*::before,*::after{animation-duration:.01ms!important;
+    animation-iteration-count:1!important;transition-duration:.01ms!important}
+}

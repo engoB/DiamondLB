@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diamond Foil — prototype TCG</title>
+<meta name="description" content="Prototype jouable : ouverture de boosters, classeur de collection et créateur de cartes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="row">
+    <a class="brand" href="#open">DIAMOND <span>FOIL</span></a>
+    <div class="tabs" role="tablist">
+      <button class="tab" data-go="open">Boosters</button>
+      <button class="tab" data-go="binder">Classeur</button>
+      <button class="tab" data-go="sets">Collections</button>
+      <button class="tab" data-go="live">En direct</button>
+      <button class="tab" data-go="studio">Créateur</button>
+      <button class="tab" data-go="settings" aria-label="Réglages">⚙</button>
+    </div>
+    <div class="wallet">
+      <span class="purse"><span class="pip"></span><b id="purse">0</b></span>
+      <span class="purse purse--tok"><span class="pip pip--tok"></span><b id="tokens">0</b></span>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <section id="view-open"   class="view"></section>
+  <section id="view-binder" class="view"></section>
+  <section id="view-sets"    class="view"></section>
+  <section id="view-live"    class="view"></section>
+  <section id="view-studio"  class="view"></section>
+  <section id="view-settings" class="view"></section>
+</main>
+
+<div class="wrap">
+  <div class="panel">
+    <h3>Prototype</h3>
+    <p>
+      Tout se passe dans votre navigateur : le tirage, la collection et les
+      cartes que vous créez sont enregistrés en local. Rien n'est envoyé
+      nulle part.
+    </p>
+    <p>
+      Les photos et les logos viennent du CDN officiel de la MLB, construits
+      à partir des identifiants réels des joueurs. Les neuf cartes Légende
+      ont leurs vraies statistiques historiques, relevées sur l'API. Les
+      autres chiffres sont illustratifs.
+    </p>
+    <div class="panel__actions">
+      <button class="btn ghost sm" id="dev-boosters">+10 boosters</button>
+      <button class="btn ghost sm" id="dev-fill">Débloquer 60 cartes</button>
+      <button class="btn ghost sm" id="dev-ultra">Obtenir une Ultra</button>
+      <button class="btn ghost sm" id="dev-reset">Tout réinitialiser</button>
+    </div>
+  </div>
+  <footer>
+    Prototype statique de Diamond Foil · photos et logos fournis par la MLB
+  </footer>
+</div>
+
+<!-- Scripts classiques (pas de modules) : la page fonctionne aussi en
+     double-cliquant le fichier, sans serveur local. -->
+<script src="teams.js"></script>
+<script src="live.js"></script>
+<script src="catalog.js"></script>
+<script src="sets.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
