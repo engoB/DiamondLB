@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://engob.github.io/DiamondLB/"><img alt="Essayer" src="https://img.shields.io/badge/Essayer-Ouvrir_un_booster-0b0b0f?style=for-the-badge&labelColor=0b0b0f"></a>
-  <a href="https://engob.github.io/portofolio/projets/diamond-foil/"><img alt="Portfolio" src="https://img.shields.io/badge/Portfolio-Senshi_Kabai-4f46e5?style=for-the-badge&labelColor=0b0b0f"></a>
+  <a href="https://www.senshicore.com/projets/diamond-foil/"><img alt="Portfolio" src="https://img.shields.io/badge/Portfolio-Senshi_Kabai-4f46e5?style=for-the-badge&labelColor=0b0b0f"></a>
 </p>
 
 <h1 align="center">Diamond Foil</h1>
@@ -41,7 +41,7 @@ Quickly test a credible card game concept without making up data or setting up a
 
 ---
 
-<p align="center"><sub>Conçu, développé et mis en ligne par <b>Senshi Kabai</b>, Product Builder · <a href="https://engob.github.io/portofolio/">portfolio</a> · <a href="https://engob.github.io/portofolio/projets/diamond-foil/">fiche du projet</a><br>© 2026 Senshi Kabai — tous droits réservés.</sub></p>
+<p align="center"><sub>Conçu, développé et mis en ligne par <b>Senshi Kabai</b>, Product Builder · <a href="https://www.senshicore.com/">portfolio</a> · <a href="https://www.senshicore.com/projets/diamond-foil/">fiche du projet</a><br>© 2026 Senshi Kabai — tous droits réservés.</sub></p>
 
 
 <details>
