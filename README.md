@@ -2,12 +2,12 @@
 
 <p align="center">
   <a href="https://engob.github.io/DiamondLB/"><img alt="Essayer" src="https://img.shields.io/badge/Essayer-Ouvrir_un_booster-0b0b0f?style=for-the-badge&labelColor=0b0b0f"></a>
-  <img alt="Statut" src="https://img.shields.io/badge/Statut-Prototype-7c3aed?style=for-the-badge&labelColor=0b0b0f">
-  <a href="https://engob.github.io/portofolio/projets/diamond-foil/"><img alt="Portfolio" src="https://img.shields.io/badge/Portfolio-S%C3%A9bastien_Khai-4f46e5?style=for-the-badge&labelColor=0b0b0f"></a>
+  <a href="https://engob.github.io/portofolio/projets/diamond-foil/"><img alt="Portfolio" src="https://img.shields.io/badge/Portfolio-Senshi_Kabai-4f46e5?style=for-the-badge&labelColor=0b0b0f"></a>
 </p>
 
 <h1 align="center">Diamond Foil</h1>
 <p align="center"><b>Ouvrir des boosters de baseball, avec les vraies stats de la MLB.</b><br>Un prototype de jeu de cartes à collectionner : boosters, classeur, créateur de cartes et scores en direct, alimenté par les données officielles de la MLB.</p>
+<p align="center"><sub>Statut : <b>Prototype</b></sub></p>
 
 ---
 
@@ -27,7 +27,7 @@ Page statique sans dépendance ni compilation, requêtes espacées pour ménager
 
 ### Aperçu
 
-<p align="center"><img src=".github/readme/1.webp" width="49%" alt="Diamond Foil — capture 1"></p>
+<p align="center"><img src=".github/readme/1.webp" width="49%" alt="Diamond Foil — capture 1"> <img src=".github/readme/2.webp" width="49%" alt="Diamond Foil — capture 2"></p>
 
 ### Mentions
 
@@ -41,7 +41,7 @@ Quickly test a credible card game concept without making up data or setting up a
 
 ---
 
-<p align="center"><sub>Conçu, développé et mis en ligne par <b>Sébastien Khai</b>, Product Builder · <a href="https://engob.github.io/portofolio/">portfolio</a> · <a href="https://engob.github.io/portofolio/projets/diamond-foil/">fiche du projet</a><br>© 2026 Sébastien Khai — tous droits réservés.</sub></p>
+<p align="center"><sub>Conçu, développé et mis en ligne par <b>Senshi Kabai</b>, Product Builder · <a href="https://engob.github.io/portofolio/">portfolio</a> · <a href="https://engob.github.io/portofolio/projets/diamond-foil/">fiche du projet</a><br>© 2026 Senshi Kabai — tous droits réservés.</sub></p>
 
 
 <details>
