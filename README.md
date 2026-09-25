@@ -1,11 +1,60 @@
-# Diamond Foil — prototype
+<p align="center"><a href="https://engob.github.io/DiamondLB/"><img src=".github/readme/banner.jpg" alt="Diamond Foil — Ouvrir des boosters de baseball, avec les vraies stats de la MLB." width="100%"></a></p>
+
+<p align="center">
+  <a href="https://engob.github.io/DiamondLB/"><img alt="Essayer" src="https://img.shields.io/badge/Essayer-Ouvrir_un_booster-0b0b0f?style=for-the-badge&labelColor=0b0b0f"></a>
+  <img alt="Statut" src="https://img.shields.io/badge/Statut-Prototype-7c3aed?style=for-the-badge&labelColor=0b0b0f">
+  <a href="https://engob.github.io/portofolio/projets/diamond-foil/"><img alt="Portfolio" src="https://img.shields.io/badge/Portfolio-S%C3%A9bastien_Khai-4f46e5?style=for-the-badge&labelColor=0b0b0f"></a>
+</p>
+
+<h1 align="center">Diamond Foil</h1>
+<p align="center"><b>Ouvrir des boosters de baseball, avec les vraies stats de la MLB.</b><br>Un prototype de jeu de cartes à collectionner : boosters, classeur, créateur de cartes et scores en direct, alimenté par les données officielles de la MLB.</p>
+
+---
+
+### Le problème
+
+Tester vite un concept de jeu de cartes crédible, sans inventer de données ni monter de serveur.
+
+### L'idée
+
+Tout vient de l'API publique de la MLB : effectifs, statistiques, légendes et scores du jour. Rien n'est écrit en dur.
+
+### Comment c'est fait
+
+Page statique sans dépendance ni compilation, requêtes espacées pour ménager l'API, cache de six heures, collection enregistrée localement.
+
+**Outils** &nbsp; `API MLB` `JavaScript` `Local-first`
+
+### Aperçu
+
+<p align="center"><img src=".github/readme/1.webp" width="49%" alt="Diamond Foil — capture 1"></p>
+
+### Mentions
+
+Prototype personnel et non commercial, **non affilié** à la MLB ni aux clubs. Données, noms, photos et logos restent la propriété de MLB Advanced Media et des clubs.
+
+### English
+
+**Diamond Foil** — *Open baseball booster packs, with real MLB stats.* A trading card game prototype: boosters, binder, card creator and live scores, powered by official MLB data.
+
+Quickly test a credible card game concept without making up data or setting up a server. Everything comes from the public MLB API: rosters, stats, legends and today's scores. Nothing is hard-coded. A static page with no dependencies or build step, spaced-out requests to be gentle with the API, a six-hour cache, collection stored locally.
+
+---
+
+<p align="center"><sub>Conçu, développé et mis en ligne par <b>Sébastien Khai</b>, Product Builder · <a href="https://engob.github.io/portofolio/">portfolio</a> · <a href="https://engob.github.io/portofolio/projets/diamond-foil/">fiche du projet</a><br>© 2026 Sébastien Khai — tous droits réservés.</sub></p>
+
+
+<details>
+<summary><b>Documentation technique</b> · notes de développement et de mise en ligne</summary>
+
+## Diamond Foil — prototype
 
 Jeu de cartes à collectionner MLB. **Toutes les données viennent de l'API
 officielle MLB. Rien n'est écrit en dur.**
 
 Un dossier, aucune dépendance, aucun build, aucun service payant.
 
-## Démarrer
+### Démarrer
 
 Double-cliquez `index.html`, ou poussez le dossier sur GitHub Pages :
 
@@ -20,7 +69,7 @@ Puis **Settings → Pages → Deploy from a branch → `main` / `/ (root)`**.
 Au premier lancement, l'application va chercher les données auprès de la MLB
 (une minute environ), puis les met en cache 6 heures.
 
-## D'où viennent les données
+### D'où viennent les données
 
 | Source | Ce qu'elle fournit |
 |---|---|
@@ -35,7 +84,7 @@ Une soixantaine de requêtes, faites une fois, en **série** — trente requête
 simultanées sur une API publique gratuite, c'est le meilleur moyen de se faire
 limiter.
 
-## Rien n'est inventé
+### Rien n'est inventé
 
 - **Les statistiques** sont celles de l'API, telles quelles.
 - **Les marqueurs** (« Meneur CC », « Meneur MPM », « Recrue ») viennent des
@@ -58,7 +107,7 @@ un classement de données réelles. La formule est visible dans `catalog.js` :
 
 Le classement se met donc à jour tout seul quand les statistiques changent.
 
-## Notes en lettres — pour comprendre sans rien connaître au baseball
+### Notes en lettres — pour comprendre sans rien connaître au baseball
 
 Un néophyte ne sait pas ce que vaut un OPS de .972. Tout le monde comprend
 « A ». Chaque aptitude est donc notée **de F à S**, comme dans *Jikkyou
@@ -85,7 +134,7 @@ et une phrase d'explication. Ce n'est pas une donnée inventée : c'est une
 conversion visible d'une mesure en note lisible, comme une note sur 20. Les
 seuils sont dans `abilities()`, au même endroit.
 
-## Visuels de sachet
+### Visuels de sachet
 
 Onglet **⚙ Réglages**. Chaque série peut avoir son propre visuel : cinq motifs
 fournis (batteur, lanceur, gant, balle, terrain), ou **votre propre image**.
@@ -93,7 +142,7 @@ Les motifs sont en SVG — nets à toute taille, quelques kilo-octets, et la
 couleur s'adapte à la collection. Une photo importée est réduite avant
 stockage, sinon deux ou trois sachets saturent le quota du navigateur.
 
-## Statistiques en français
+### Statistiques en français
 
 Terminologie du baseball francophone. Survolez une statistique pour son
 intitulé complet.
@@ -105,7 +154,7 @@ intitulé complet.
 | PP | points produits | V-D | victoires-défaites |
 | OPS | présence + puissance | MJ | manches lancées |
 
-## Mécanique
+### Mécanique
 
 | | |
 |---|---|
@@ -118,7 +167,7 @@ intitulé complet.
 | Boosters thématiques | par franchise, division ou série |
 | Collections | franchises, divisions, saisons, séries, **plus les vôtres** |
 
-## Les cinq écrans
+### Les cinq écrans
 
 **Boosters** · ouverture avec déchirure, révélation carte par carte en grand,
 sans minuteur — rien n'avance tant que vous ne cliquez pas.
@@ -136,7 +185,7 @@ rafraîchis toutes les 30 secondes.
 > Le code du créateur n'est pas un mot de passe : il vit dans `localStorage`,
 > en clair. Il écarte un curieux, rien de plus.
 
-## Le foil
+### Le foil
 
 Technique de `pokemon-cards-css` (simeydotme) : la teinte est pilotée par le
 pointeur via `--h`, les couches se mélangent entre elles par
@@ -144,7 +193,7 @@ pointeur via `--h`, les couches se mélangent entre elles par
 curseur module l'intensité. Les couleurs **changent** au mouvement au lieu de
 glisser.
 
-## Fichiers
+### Fichiers
 
 | | |
 |---|---|
@@ -160,7 +209,7 @@ glisser.
 `teams.js` est le seul fichier de données local : il contient les couleurs des
 clubs, que l'API ne fournit pas. Tout le reste vient du réseau.
 
-## Limites
+### Limites
 
 Depuis un fichier local (`file://`), le navigateur peut bloquer les requêtes
 (CORS). En ligne, sur GitHub Pages, elles passent. En production, ces appels
@@ -168,3 +217,5 @@ devraient transiter par votre serveur : l'API MLB n'offre aucun SLA.
 
 Le « film » d'une carte Ultra est une mise en scène, pas une vraie vidéo :
 brancher des archives demande hébergement et droits.
+
+</details>
